@@ -22,7 +22,7 @@ export const LoginForm = () => {
         const res = await signIn("credentials", {
             username,
             password,
-            callbackUrl: "/dashboard",
+            callbackUrl: "/pos/register",
             redirect:false
         });
 
@@ -31,7 +31,7 @@ export const LoginForm = () => {
             setError("Invalid username or password");
             return;
         }
-        router.push("/dashboard/register");
+        router.push("/pos/register");
     };
 
     return (
