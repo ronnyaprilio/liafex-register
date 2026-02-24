@@ -31,7 +31,7 @@ export const LoginForm = () => {
             setError("Invalid username or password");
             return;
         }
-        router.push("/dashboard");
+        router.push("/dashboard/register");
     };
 
     return (

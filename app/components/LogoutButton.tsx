@@ -2,15 +2,14 @@
 
 import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
+import { NavItem } from "./register/NavItem";
 
 export default function LogoutButton() {
   return (
-    <button
+    <NavItem
+      icon={<LogOut size={18}/>}
+      label="Logout"
       onClick={() => signOut({ callbackUrl: "/" })}
-      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl w-full transition-colors"
-    >
-      <LogOut size={20} />
-      Logout
-    </button>
+    />
   );
 }
