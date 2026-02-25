@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
   for (const item of body.items) {
     if (
-      !item.id ||
+      !item.code ||
       !item.name ||
       typeof item.price !== "number" ||
       item.price <= 0 ||

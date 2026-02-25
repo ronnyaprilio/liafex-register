@@ -14,11 +14,11 @@ export default function POSPage() {
 
   const addToCart = (product: Omit<CartItem, "quantity">) => {
     setCart(prev => {
-      const existing = prev.find(i => i.id === product.id);
+      const existing = prev.find(i => i.code === product.code);
 
       if (existing) {
         return prev.map(i =>
-          i.id === product.id
+          i.code === product.code
             ? { ...i, quantity: i.quantity + 1 }
             : i
         );
@@ -28,11 +28,11 @@ export default function POSPage() {
     });
   };
 
-  const updateQuantity = (id: string, delta: number) => {
+  const updateQuantity = (code: string, delta: number) => {
     setCart(prev =>
       prev
         .map(i =>
-          i.id === id
+          i.code === code
             ? { ...i, quantity: Math.max(0, i.quantity + delta) }
             : i
         )
@@ -56,105 +56,58 @@ export default function POSPage() {
     }, 0);
 
     const newTransaction = {
-      date: new Date().toLocaleString(),
       items: cart,
       total: subtotal
     };
 
-    await fetch("/pos/api/transactions", {
+    const res = await fetch("/pos/api/transactions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(newTransaction),
     });
+    const saved = await res.json();
 
-    handlePrint();
+    handlePrint(saved);
     setCart([]);
     setShowConfirm(false);
   };
 
-  const handlePrint = () => {
-    if (cart.length === 0) return;
+  const handlePrint = async (tx: Transaction) => {
+    const res = await fetch("/pos/api/prints", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(tx),
+    });
 
-    const now = new Date().toLocaleString();
-    const subtotal = cart.reduce((acc, item) => {
-  const discountedPrice = item.price * (1 - item.discount);
-  return acc + discountedPrice * item.quantity;
-}, 0);
+    const { html } = await res.json();
 
-const receiptHTML = `
-    <html>
-    <head>
-    <title>Receipt</title>
-    <style>
-      body {
-        font-family: monospace;
-        width: 80mm;
-        margin: 0;
-        padding: 10px;
-      }
-      h2 { text-align:center; margin:0; }
-      .line { border-top:1px dashed #000; margin:8px 0; }
-      .item { font-size:12px; margin-bottom:6px; }
-      .total {
-        display:flex;
-        justify-content:space-between;
-        font-weight:bold;
-        font-size:14px;
-      }
-    </style>
-    </head>
-    <body>
-      <h2>KEDAI KELINCI</h2>
-      <div class="line"></div>
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
 
-      ${cart.map(item => {
-        const discountedPrice = item.price * (1 - item.discount);
-        const total = discountedPrice * item.quantity;
+    document.body.appendChild(iframe);
 
-    return `
-      <div class="item">
-            ${item.name}
-            ${item.discount > 0 ? `<br/>${item.discount * 100}% discount` : ""}
-            <br/>
-            ${item.quantity} x $${discountedPrice.toFixed(2)}
-            <div style="text-align:right;">
-              $${total.toFixed(2)}
-            </div>
-          </div>
-        `;
-      }).join("")}
+    const doc = iframe.contentWindow?.document;
+    if (!doc) return;
 
-      <div class="line"></div>
+    doc.open();
+    doc.write(html);
+    doc.close();
 
-      <div class="total">
-        <span>TOTAL</span>
-        <span>$${subtotal.toFixed(2)}</span>
-      </div>
+    iframe.onload = () => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
 
-      <div class="line"></div>
-      <p style="text-align:center;">Thank you 🐇</p>
-
-      <script>
-        window.onload = function() {
-          window.print();
-        };
-      </script>
-    </body>
-    </html>
-    `;
-
-    const printWindow = window.open("", "_blank");
-
-    if (!printWindow) {
-      alert("Popup blocked. Please allow popups for this site.");
-      return;
-    }
-
-    printWindow.document.open();
-    printWindow.document.write(receiptHTML);
-    printWindow.document.close();
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 500);
+    };
   };
 
   const confirmTotal = cart.reduce((acc, item) => {
@@ -179,7 +132,6 @@ const receiptHTML = `
             <ActionBar
               onPay={handlePay}
               onVoid={handleVoid}
-              onPrint={handlePrint}
             />
           </div>
         </div>
@@ -191,17 +143,41 @@ const receiptHTML = `
 
             <div className="max-h-48 overflow-y-auto text-sm mb-4">
               {cart.map(item => {
-                const discountedPrice = item.price * (1 - item.discount);
+                const original = item.price;
+                const discountAmount = original * item.discount;
+                const discounted = original - discountAmount;
+                const total = discounted * item.quantity;
+
                 return (
-                  <div key={item.id} className="flex justify-between">
-                    <span>{item.name} x{item.quantity}</span>
-                    <span>
-                      ${(discountedPrice * item.quantity).toFixed(2)}
-                    </span>
+                  <div key={item.code} className="border-b py-2">
+                    <div className="font-medium">{item.name}</div>
+
+                    {item.discount > 0 ? (
+                      <>
+                        <div className="text-xs text-gray-400 line-through">
+                          ${original.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-emerald-600">
+                          Discount {item.discount * 100}% (-${discountAmount.toFixed(2)})
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-xs text-gray-500">
+                        ${original.toFixed(2)}
+                      </div>
+                    )}
+
+                    <div className="flex justify-between text-sm font-semibold">
+                      <span>
+                        {item.quantity} x ${discounted.toFixed(2)}
+                      </span>
+                      <span>${total.toFixed(2)}</span>
+                    </div>
                   </div>
                 );
               })}
-              <div className="border-t mt-3 pt-3 flex justify-between font-bold">
+
+              <div className="mt-3 pt-3 flex justify-between font-bold text-base">
                 <span>Total</span>
                 <span>${confirmTotal.toFixed(2)}</span>
               </div>

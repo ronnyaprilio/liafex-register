@@ -1,14 +1,15 @@
 "use client";
 
 import { CreditCard, Printer, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   onPay: () => void;
   onVoid: () => void;
-  onPrint: () => void;
 }
 
-export const ActionBar = ({ onPay, onVoid, onPrint }: Props) => {
+export const ActionBar = ({ onPay, onVoid }: Props) => {
+  const router = useRouter();
   const btn = "h-12 md:h-14 rounded-xl md:rounded-2xl font-semibold flex items-center justify-center gap-2 transition active:scale-95";
   return (
         <div className="p-4 bg-white grid grid-cols-3 gap-3 shadow-2xl">      
@@ -29,7 +30,7 @@ export const ActionBar = ({ onPay, onVoid, onPrint }: Props) => {
       </button>
 
       <button
-        onClick={onPrint}
+        onClick={() => router.push("/pos/receipt")}
         className={`${btn} bg-gray-900 hover:bg-black text-white`}
       >
         <Printer size={18} />

@@ -29,7 +29,7 @@ export const ReceiptPanel = forwardRef<HTMLDivElement, Props>(
 
             return (
               <div
-                key={item.id}
+                key={item.code}
                 className="flex justify-between bg-gray-50 p-3 rounded-xl"
               >
                 <div>
@@ -53,13 +53,13 @@ export const ReceiptPanel = forwardRef<HTMLDivElement, Props>(
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button onClick={() => updateQuantity(item.id, -1)}>
+                  <button onClick={() => updateQuantity(item.code, -1)}>
                     <Minus size={14} />
                   </button>
 
                   <span>{item.quantity}</span>
 
-                  <button onClick={() => updateQuantity(item.id, 1)}>
+                  <button onClick={() => updateQuantity(item.code, 1)}>
                     <Plus size={14} />
                   </button>
                 </div>

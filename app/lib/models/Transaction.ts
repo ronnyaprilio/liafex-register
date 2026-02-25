@@ -40,6 +40,7 @@ TransactionSchema.pre("save", async function (this: HydratedDocument<any>) {
 
     this.transaction_ref = `POS-${date}-${time}-${random}`;
   }
+  console.log("Transaction reference for new transaction: ", this.transaction_ref);
 });
 
 export default mongoose.models.Transaction ||

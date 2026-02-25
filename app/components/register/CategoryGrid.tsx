@@ -1,33 +1,61 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
-interface Props {
-  addToCart: (product: {
-    id: string;
-    name: string;
-    price: number;
-    discount: number;
-  }) => void;
+interface Product {
+  code: string;
+  name: string;
+  price: number;
+  discount: number;
+  image: string;
 }
 
-const PRODUCTS = [
-  { id: "1", name: "Coffee", price: 34, discount: 0.1, image: "/categories/coffee.png" },
-  { id: "2", name: "Pizza", price: 12, discount: 0.25, image: "/categories/pizza.png" },
-  { id: "3", name: "Sandwich", price: 16, discount: 0.3, image: "/categories/sandwich.png" }
-];
+interface Props {
+  addToCart: (product: Omit<Product, "image">) => void;
+}
 
 export const CategoryGrid = ({ addToCart }: Props) => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const res = await fetch("/pos/api/products");
+      const data = await res.json();
+      setProducts(data);
+      setLoading(false);
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center text-gray-400">
+        Loading products...
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 min-h-0 bg-gray-50 overflow-y-auto">
       <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-        {PRODUCTS.map(product => {
-          const discountedPrice = product.price * (1 - product.discount);
+        {products.map(product => {
+          const discountedPrice =
+            product.price * (1 - product.discount);
 
           return (
             <div
-              key={product.id}
-              onClick={() => addToCart(product)}
+              key={product.code}
+              onClick={() =>
+                addToCart({
+                  code: product.code,
+                  name: product.name,
+                  price: product.price,
+                  discount: product.discount,
+                })
+              }
               className="bg-white rounded-xl shadow hover:shadow-md cursor-pointer transition overflow-hidden group"
             >
               <div className="relative h-24 w-full">
