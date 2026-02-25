@@ -11,4 +11,5 @@ export interface Transaction {
   date: string;
   items: CartItem[];
   total: number;
+  transaction_ref: string;
 }

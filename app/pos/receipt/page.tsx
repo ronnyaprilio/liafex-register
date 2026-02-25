@@ -6,12 +6,28 @@ import { Transaction } from "@/app/types/cart";
 
 export default function ReceiptPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("transactions");
-    if (saved) {
-      setTransactions(JSON.parse(saved));
-    }
+    const fetchTransactions = async () => {
+      try {
+        const res = await fetch("/pos/api/transactions");
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch transactions");
+        }
+
+        const data = await res.json();
+        setTransactions(data);
+      } catch (err: any) {
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
   return (
@@ -27,7 +43,7 @@ export default function ReceiptPage() {
 
         {transactions.map(tx => (
           <div
-            key={tx.id}
+            key={tx.transaction_ref}
             className="border p-4 rounded-xl mb-4 shadow-sm"
           >
             <p className="text-sm text-gray-500">{tx.date}</p>

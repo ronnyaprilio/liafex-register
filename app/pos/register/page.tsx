@@ -49,24 +49,25 @@ export default function POSPage() {
     setShowConfirm(true);
   };
 
-  const confirmPayment = () => {
+  const confirmPayment = async () => {
     const subtotal = cart.reduce((acc, item) => {
       const discountedPrice = item.price * (1 - item.discount);
       return acc + discountedPrice * item.quantity;
     }, 0);
 
     const newTransaction = {
-      id: crypto.randomUUID(),
       date: new Date().toLocaleString(),
       items: cart,
       total: subtotal
     };
 
-    const existing = JSON.parse(localStorage.getItem("transactions") || "[]");
-    localStorage.setItem(
-      "transactions",
-      JSON.stringify([newTransaction, ...existing])
-    );
+    await fetch("/pos/api/transactions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newTransaction),
+    });
 
     handlePrint();
     setCart([]);
