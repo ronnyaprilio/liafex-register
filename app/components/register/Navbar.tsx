@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Receipt, Store } from "lucide-react";
+import { Box, Home, Receipt, Store } from "lucide-react";
 import LogoutButton from "../LogoutButton";
 import { NavItem } from "./NavItem";
 import { useRouter } from "next/navigation";
@@ -29,6 +29,11 @@ export const Navbar = () => {
           icon={<Receipt size={18} />}
           label="Receipt"
           onClick={() => router.push("/pos/receipt")}
+        />
+        <NavItem
+          icon={<Box size={18} />}
+          label="Products"
+          onClick={() => router.push("/pos/products")}
         />
         <LogoutButton />
       </div>

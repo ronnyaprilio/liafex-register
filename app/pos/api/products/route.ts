@@ -24,6 +24,7 @@ export async function POST(req: Request) {
   try {
     await connectDB();
     const body = await req.json();
+    console.log("CREATE PRODUCT BODY:", body);
 
     if (
       !body.name ||
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
     }
 
     const product = await Product.create({
+      code: body.code.trim(),
       name: body.name.trim(),
       price: body.price,
       discount: body.discount,

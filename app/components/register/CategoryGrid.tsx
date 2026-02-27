@@ -1,15 +1,8 @@
 "use client";
 
+import { Product } from "@/app/types/cart";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-
-interface Product {
-  code: string;
-  name: string;
-  price: number;
-  discount: number;
-  image: string;
-}
 
 interface Props {
   addToCart: (product: Omit<Product, "image">) => void;

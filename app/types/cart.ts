@@ -13,3 +13,11 @@ export interface Transaction {
   total: number;
   transaction_ref: string;
 }
+
+export interface Product {
+  code: string;
+  name: string;
+  price: number;
+  discount: number;
+  image: string;
+}
