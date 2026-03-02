@@ -17,12 +17,19 @@ export default function ReceiptPage() {
     const fetchTransactions = async () => {
       try {
         const res = await fetch("/pos/api/transactions");
-        if (!res.ok) throw new Error("Failed to fetch transactions");
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch transactions");
+        }
 
         const data = await res.json();
         setTransactions(data);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Something went wrong");
+        }
       } finally {
         setLoading(false);
       }

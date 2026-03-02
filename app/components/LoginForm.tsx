@@ -27,8 +27,14 @@ export const LoginForm = () => {
         });
 
         setIsLoading(false);
-        if(res?.error) {
-            setError("Invalid username or password");
+        if (res?.error) {
+            console.log("res.code:", res.code);
+            if (res?.code && res.code === "RATE_LIMIT") {
+                setError("Too many login attempts. Please wait 1 minute.");
+            } else {
+                setError("Invalid username or password");
+            }
+
             return;
         }
         router.push("/pos/register");

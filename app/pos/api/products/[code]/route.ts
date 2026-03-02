@@ -2,9 +2,12 @@ import Product from "@/app/lib/models/Product";
 import { connectDB } from "@/app/lib/mongodb";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: { code: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ code: string }> }
+) {
   try {
-    const { code } = await Promise.resolve(params);
+    const { code } = await params;
 
     await connectDB();
 
@@ -17,17 +20,30 @@ export async function GET(req: Request, { params }: { params: { code: string } }
     return NextResponse.json(product);
   } catch (err) {
     console.error("GET PRODUCT ERROR:", err);
-    return NextResponse.json({ error: "Failed to fetch product" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch product" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { code: string } }) {
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ code: string }> }
+) {
   try {
-    const { code } = await Promise.resolve(params);
+    const { code } = await params;
     const body = await req.json();
 
-    if (!body.name || typeof body.price !== "number" || typeof body.discount !== "number") {
-      return NextResponse.json({ error: "Invalid product data" }, { status: 400 });
+    if (
+      !body.name ||
+      typeof body.price !== "number" ||
+      typeof body.discount !== "number"
+    ) {
+      return NextResponse.json(
+        { error: "Invalid product data" },
+        { status: 400 }
+      );
     }
 
     await connectDB();
@@ -52,13 +68,20 @@ export async function PUT(req: Request, { params }: { params: { code: string } }
     return NextResponse.json(updated);
   } catch (err) {
     console.error("UPDATE PRODUCT ERROR:", err);
-    return NextResponse.json({ error: "Failed to update product" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update product" },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { code: string } }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ code: string }> }
+) {
   try {
-    const { code } = await Promise.resolve(params);
+    const { code } = await params;
+
     await connectDB();
 
     const deleted = await Product.findOneAndUpdate(
@@ -74,6 +97,9 @@ export async function DELETE(req: Request, { params }: { params: { code: string 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("DELETE PRODUCT ERROR:", err);
-    return NextResponse.json({ error: "Failed to delete product" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete product" },
+      { status: 500 }
+    );
   }
 }

@@ -1,3 +1,4 @@
+import { CartItem } from "@/app/types/cart";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -91,7 +92,7 @@ export async function POST(req: Request) {
         <div class="line"></div>
 
         ${items
-        .map((item: any) => {
+        .map((item: CartItem) => {
             const discountAmount = item.price * item.discount;
             const discounted = item.price - discountAmount;
             const totalItem = discounted * item.quantity;
