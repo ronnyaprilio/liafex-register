@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { connectDB } from "./app/lib/mongodb";
 import User from "./app/lib/models/User";
@@ -6,10 +6,10 @@ import bcrypt from "bcryptjs";
 import { checkRateLimit } from "./app/lib/rate-limit";
 import axios from "axios";
 
-class RateLimitError extends Error {
-  code = "RATE_LIMIT";
+class RateLimitError extends CredentialsSignin {
   constructor() {
-    super("Too many login attempts");
+    super();
+    this.code = "RATE_LIMIT";
   }
 }
 
