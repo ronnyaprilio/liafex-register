@@ -5,7 +5,7 @@ import { signIn } from "next-auth/react";
 import { TextBox } from "./TextBox";
 import { SubmitButton } from "./SubmitButton";
 import { User, Lock, Building2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 export const LoginForm = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -13,13 +13,16 @@ export const LoginForm = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [recaptchaReady, setRecaptchaReady] = useState(false);
-    const router = useRouter();
+    // const router = useRouter();
 
-    const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!; // Masukkan site key di .env.local
+    const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!;
 
     useEffect(() => {
         const scriptId = "recaptcha-v3";
-        if (document.getElementById(scriptId)) return;
+        if (document.getElementById(scriptId)) {
+            setRecaptchaReady(true);
+            return;
+        }
 
         const script = document.createElement("script");
         script.id = scriptId;
@@ -27,7 +30,7 @@ export const LoginForm = () => {
         script.async = true;
         script.onload = () => setRecaptchaReady(true);
         document.body.appendChild(script);
-    }, []);
+    }, [RECAPTCHA_SITE_KEY]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,7 +38,7 @@ export const LoginForm = () => {
         setError("");
 
         if (!recaptchaReady) {
-            setError("reCAPTCHA not loaded. Please try again.");
+            setError("reCAPTCHA not loaded. Please refresh the page.");
             setIsLoading(false);
             return;
         }
@@ -62,7 +65,8 @@ export const LoginForm = () => {
                 return;
             }
 
-            router.push("/pos/register");
+            // router.push("/pos/register");
+            window.location.href = "/pos/register";
         } catch (err) {
             console.error(err);
             setError("Something went wrong. Please try again.");
